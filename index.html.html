@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library Futures Matrix</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f3; --bg3: #eeecea;
+    --text: #1a1a18; --text2: #5f5e5a; --text3: #888780;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --radius: 10px; --radius-sm: 7px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 1.5rem 1rem 3rem; }
+  .container { max-width: 740px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--text2); margin-bottom: 1.25rem; }
+  .axis-box { background: var(--bg2); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 1.25rem; display: flex; gap: 24px; flex-wrap: wrap; }
+  .axis-box div { flex: 1; min-width: 160px; }
+  .axis-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; color: var(--text3); margin-bottom: 2px; }
+  .axis-value { font-size: 13px; color: var(--text); }
+  .topic-row { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+  .topic-row span { font-size: 13px; color: var(--text2); margin-right: 2px; }
+  .tab-btn { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.2); background: var(--bg); color: var(--text2); cursor: pointer; transition: background 0.15s; }
+  .tab-btn:hover { background: var(--bg2); }
+  .tab-btn.active-ai       { background: #EEEDFE; color: #3C3489; border-color: #AFA9EC; }
+  .tab-btn.active-climate  { background: #E1F5EE; color: #085041; border-color: #5DCAA5; }
+  .tab-btn.active-political { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
+  .matrix-wrap { display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto 1fr; }
+  .y-axis { grid-row: 1/3; grid-column: 1; display: flex; align-items: center; justify-content: center; }
+  .y-axis span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+  .x-row { grid-row: 1; grid-column: 2; display: flex; justify-content: space-between; padding: 0 6px; margin-bottom: 5px; }
+  .x-lbl { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .matrix { grid-row: 2; grid-column: 2; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 7px; }
+  .quad { background: var(--bg); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 13px; min-height: 130px; }
+  .qtag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .qtitle { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .qprompt { font-size: 11px; color: var(--text2); font-style: italic; line-height: 1.45; }
+  .teal-q  .qtag { background: #E1F5EE; color: #085041; }
+  .amber-q .qtag { background: #FAEEDA; color: #633806; }
+  .coral-q .qtag { background: #FAECE7; color: #712B13; }
+  .blue-q  .qtag { background: #E6F1FB; color: #0C447C; }
+  hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 1.5rem 0; }
+  .section-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+  .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .input-box { background: var(--bg2); border-radius: var(--radius-sm); padding: 10px; }
+  .input-lbl { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+  .lbl-achieve    { color: #085041; }
+  .lbl-improve    { color: #633806; }
+  .lbl-prevent    { color: #712B13; }
+  .lbl-contribute { color: #0C447C; }
+  .input-box textarea { width: 100%; font-size: 13px; line-height: 1.5; resize: none; background: transparent; border: none; outline: none; color: var(--text); font-family: inherit; min-height: 60px; }
+  .submit-row { display: flex; gap: 10px; margin-top: 1rem; align-items: center; }
+  .btn { font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--bg); color: var(--text); cursor: pointer; transition: background 0.15s; }
+  .btn:hover { background: var(--bg2); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg-text { font-size: 12px; color: var(--text3); }
+  .msg-error { color: #993C1D; }
+  .notice { background: #FAEEDA; border: 0.5px solid #EF9F27; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: #633806; margin-bottom: 1.25rem; display: none; }
+  @media (max-width: 500px) {
+    .matrix { grid-template-columns: 1fr; grid-template-rows: repeat(4, auto); }
+    .inputs-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="notice" id="setup-notice">
+    &#9888;&#65039; <strong>Setup needed:</strong> This form is not yet connected to Power Automate. Open the file in a text editor, find <code>PASTE_YOUR_POWER_AUTOMATE_URL_HERE</code> and replace it with your flow URL.
+  </div>
+
+  <h1>Library futures matrix</h1>
+  <p class="subtitle">Help MLA imagine the future of libraries in different scenarios.</p>
+
+  <div class="axis-box">
+    <div>
+      <div class="axis-label">Horizontal axis</div>
+      <div class="axis-value">Libraries struggle &nbsp;&#8592;&#8594;&nbsp; Libraries thrive</div>
+    </div>
+    <div>
+      <div class="axis-label">Vertical axis</div>
+      <div class="axis-value">Society struggles &nbsp;&#8597;&nbsp; Society thrives</div>
+    </div>
+  </div>
+
+  <div class="topic-row">
+    <span>Topic:</span>
+    <button class="tab-btn active-ai" id="tab-ai" onclick="setTopic('ai')">Use of AI</button>
+    <button class="tab-btn" id="tab-climate" onclick="setTopic('climate')">Climate change</button>
+    <button class="tab-btn" id="tab-political" onclick="setTopic('political')">Political landscape</button>
+  </div>
+
+  <div class="matrix-wrap">
+    <div class="y-axis"><span>Society &#8593;</span></div>
+    <div class="x-row">
+      <div class="x-lbl">&#8592; Libraries struggle</div>
+      <div class="x-lbl">Libraries thrive &#8594;</div>
+    </div>
+    <div class="matrix">
+      <div class="quad amber-q">
+        <div class="qtag">Improve</div>
+        <div class="qtitle" id="qt-improve"></div>
+        <div class="qprompt" id="qp-improve"></div>
+      </div>
+      <div class="quad teal-q">
+        <div class="qtag">Achieve</div>
+        <div class="qtitle" id="qt-achieve"></div>
+        <div class="qprompt" id="qp-achieve"></div>
+      </div>
+      <div class="quad coral-q">
+        <div class="qtag">Prevent</div>
+        <div class="qtitle" id="qt-prevent"></div>
+        <div class="qprompt" id="qp-prevent"></div>
+      </div>
+      <div class="quad blue-q">
+        <div class="qtag">Contribute</div>
+        <div class="qtitle" id="qt-contribute"></div>
+        <div class="qprompt" id="qp-contribute"></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Your response &#8212; one thought per quadrant</div>
+  <div class="inputs-grid">
+    <div class="input-box">
+      <div class="input-lbl lbl-improve">Improve</div>
+      <textarea id="ta-improve" placeholder="Your thoughts on this scenario..."></textarea>
+    </div>
+    <div class="input-box">
+      <div class="input-lbl lbl-achieve">Achieve</div>
+      <textarea id="ta-achieve" placeholder="Your thoughts on this scenario..."></textarea>
+    </div>
+    <div class="input-box">
+      <div class="input-lbl lbl-prevent">Prevent</div>
+      <textarea id="ta-prevent" placeholder="Your thoughts on this scenario..."></textarea>
+    </div>
+    <div class="input-box">
+      <div class="input-lbl lbl-contribute">Contribute</div>
+      <textarea id="ta-contribute" placeholder="Your thoughts on this scenario..."></textarea>
+    </div>
+  </div>
+  <div class="submit-row">
+    <button class="btn" id="submit-btn" onclick="submitResponse()">Submit response</button>
+    <span class="msg-text" id="msg"></span>
+  </div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// STEP 1: Replace the URL below with your Power Automate HTTP URL
+// ---------------------------------------------------------------
+var POWER_AUTOMATE_URL = 'https://defaultb3f9237463bd4f34b035295b537236.b0.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3281422bede54938b9d3352bf2804ea4/triggers/manual/paths/invoke?api-version=1';
+// ---------------------------------------------------------------
+
+var topics = {
+  ai: {
+    label: 'Use of AI', color: '#534AB7', bg: '#EEEDFE',
+    quadrants: {
+      achieve:    ['Society thrives, libraries thrive'],
+      improve:    ['Society thrives, libraries struggle'],
+      prevent:    ['Society struggles, libraries struggle'],
+      contribute: ['Society struggles, libraries thrive']
+    }
+  },
+  climate: {
+    label: 'Climate change', color: '#0F6E56', bg: '#E1F5EE',
+    quadrants: {
+      achieve:    ['Society thrives, libraries thrive'],
+      improve:    ['Society thrives, libraries struggle'],
+      prevent:    ['Society struggles, libraries struggle'],
+      contribute: ['Society struggles, libraries thrive']
+    }
+  },
+  political: {
+    label: 'Political landscape', color: '#854F0B', bg: '#FAEEDA',
+    quadrants: {
+      achieve:    ['Society thrives, libraries thrive'],
+      improve:    ['Society thrives, libraries struggle'],
+      prevent:    ['Society struggles, libraries struggle'],
+      contribute: ['Society struggles, libraries thrive']
+    }
+  }
+};
+
+var curTopic = 'ai';
+
+// Show setup notice if URL not yet configured
+if (POWER_AUTOMATE_URL === 'PASTE_YOUR_POWER_AUTOMATE_URL_HERE') {
+  document.getElementById('setup-notice').style.display = 'block';
+}
+
+function setTopic(t) {
+  curTopic = t;
+  var keys = ['ai','climate','political'];
+  for (var i = 0; i < keys.length; i++) {
+    var x = keys[i];
+    document.getElementById('tab-' + x).className = 'tab-btn' + (x === t ? ' active-' + x : '');
+  }
+  updateText();
+}
+
+function updateText() {
+  var tp = topics[curTopic];
+  var qs = ['achieve','improve','prevent','contribute'];
+  for (var i = 0; i < qs.length; i++) {
+    var q = qs[i];
+    document.getElementById('qt-' + q).textContent = tp.quadrants[q][0];
+  }
+}
+
+function submitResponse() {
+  var qs = ['achieve','improve','prevent','contribute'];
+  var vals = {};
+  for (var i = 0; i < qs.length; i++) {
+    vals[qs[i]] = document.getElementById('ta-' + qs[i]).value.trim();
+  }
+  var hasAny = false;
+  for (var i = 0; i < qs.length; i++) { if (vals[qs[i]]) { hasAny = true; break; } }
+  if (!hasAny) { showMsg('Please fill in at least one quadrant.', false); return; }
+
+  if (POWER_AUTOMATE_URL === 'PASTE_YOUR_POWER_AUTOMATE_URL_HERE') {
+    showMsg('Not connected yet — please complete setup first.', true); return;
+  }
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  showMsg('Submitting...', false);
+
+  var payload = {
+    topic:      topics[curTopic].label,
+    timestamp:  new Date().toLocaleString(),
+    achieve:    vals.achieve,
+    improve:    vals.improve,
+    prevent:    vals.prevent,
+    contribute: vals.contribute
+  };
+
+  fetch(POWER_AUTOMATE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (res.ok || res.status === 202) {
+      for (var i = 0; i < qs.length; i++) { document.getElementById('ta-' + qs[i]).value = ''; }
+      showMsg('Response submitted! Thank you.', false);
+    } else {
+      showMsg('Something went wrong. Please try again.', true);
+    }
+  })
+  .catch(function() {
+    showMsg('Could not connect. Check your internet connection and try again.', true);
+  })
+  .finally(function() {
+    btn.disabled = false;
+  });
+}
+
+function showMsg(m, isError) {
+  var el = document.getElementById('msg');
+  el.textContent = m;
+  el.className = 'msg-text' + (isError ? ' msg-error' : '');
+  if (!isError) { setTimeout(function() { el.textContent = ''; }, 4000); }
+}
+
+updateText();
+</script>
+</body>
+</html>
