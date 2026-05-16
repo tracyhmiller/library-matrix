@@ -68,7 +68,7 @@
 <div class="container">
 
   <div class="notice" id="setup-notice">
-    &#9888;&#65039; <strong>Setup needed:</strong> This form is not yet connected to Google Sheets. Follow the setup guide and replace <code>https://script.google.com/macros/s/AKfycbxa6H1-OMqxWN-yswMKDON3F8UHTxHOT1ed5YpMzaYNb1E9mBkrAJYP5QgyMnzTGzvK/exec/code> with your Apps Script URL.
+    &#9888;&#65039; <strong>Setup needed:</strong> This form is not yet connected to Google Sheets. Follow the setup guide and replace <code>PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE</code> with your Apps Script URL.
   </div>
 
   <h1>Library futures matrix</h1>
@@ -155,7 +155,7 @@
 // Replace the URL below with your Google Apps Script Web App URL
 // (see setup guide for instructions)
 // ----------------------------------------------------------------
-var SCRIPT_URL = 'PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa6H1-OMqxWN-yswMKDON3F8UHTxHOT1ed5YpMzaYNb1E9mBkrAJYP5QgyMnzTGzvK/exec';
 // ----------------------------------------------------------------
 
 var topics = {
@@ -190,7 +190,7 @@ var topics = {
 
 var curTopic = 'ai';
 
-if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxa6H1-OMqxWN-yswMKDON3F8UHTxHOT1ed5YpMzaYNb1E9mBkrAJYP5QgyMnzTGzvK/exec') {
+if (SCRIPT_URL === 'PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE') {
   document.getElementById('setup-notice').style.display = 'block';
 }
 
